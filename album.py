@@ -1,10 +1,12 @@
-import requests, wget
+import requests, wget, os
 from time import sleep
 from db import getLastTrackIdx, updateTrackInfoList, getDownloadList, setDownloadDone
 
 trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d'
 trackAudioUrl = 'https://www.ximalaya.com/revision/play/v1/audio?id=%s&ptype=1'
 headers = {'user-agent': 'ximalaya/0.0.1'}
+
+DOWNLOADDIR = 'download/'
 
 def handleAlbum(albumId: str):
     allTrackList = getAlbumTrackList(albumId)
@@ -77,12 +79,18 @@ def getAlbumTrackList(albumId: str):
 
 def handleDownload(albumId: str):
     downloadList = getDownloadList(albumId)
-    for item in downloadList:
-        filename = 'download/' + str(item[0]) + '-' + item[1] + '.m4a'
-        try:
-            print('\ndownloading...' + item[1])
-            wget.download(item[2], out=filename)
-            setDownloadDone(albumId, item[0])
-        except Exception as e:
-            print(e)
+    if len(downloadList) > 0:
+        folder = DOWNLOADDIR + albumId
+        createDirIfNotExist(folder)
+        for item in downloadList:
+            filename = folder + '/' + str(item[0]) + '-' + item[1] + '.m4a'
+            try:
+                print('\ndownloading...' + item[1])
+                wget.download(item[2], out=filename)
+                setDownloadDone(albumId, item[0])
+            except Exception as e:
+                print(e)
 
+def createDirIfNotExist(folder: str):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
