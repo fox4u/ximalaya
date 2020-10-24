@@ -16,12 +16,17 @@ def updateTrackInfoList(trackInfoTupleList: list):
 
 
 def getDownloadList(albumId : str):
-    c.execute("select trackIndex, title, url from track where albumId='%s' and done = 0 order by trackIndex asc" % albumId)
+    c.execute('select trackIndex, title, url from track where albumId="%s" and done = 0 order by trackIndex asc' % albumId)
     res = c.fetchall()
     return res
 
-def setDownloadDone(albumId : str, trackIndex: int):
-    c.execute("update track set done=1 where albumId=%s and trackIndex=%d" % (albumId, trackIndex))
+def setDownloadDone(albumId : str, trackIndex : int):
+    c.execute('update track set done=1 where albumId="%s" and trackIndex="%d"' % (albumId, trackIndex))
     conn.commit()
+
+def isTrackExist(albumId : str, trackId : str):
+    c.execute('select count(*) from track where albumId="%s" and trackId="%s"' % (albumId, trackId))
+    res = c.fetchone()
+    return res[0] == 1
 
 

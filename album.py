@@ -1,6 +1,6 @@
 import requests, wget, os
 from time import sleep
-from db import getLastTrackIdx, updateTrackInfoList, getDownloadList, setDownloadDone
+from db import getLastTrackIdx, updateTrackInfoList, getDownloadList, setDownloadDone, isTrackExist
 
 trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d'
 trackAudioUrl = 'https://www.ximalaya.com/revision/play/v1/audio?id=%s&ptype=1'
@@ -34,46 +34,47 @@ def getTrackAudioTupleList(trackInfoList: list):
 
 def getAlbumTrackList(albumId: str):
     pageNum = 1
-    lastTrackIdx = getLastTrackIdx(albumId)    
+    lastTrackIdx = getLastTrackIdx(albumId)
+    index = lastTrackIdx
+    trackHandleCount = 0
     allTrackList = []
     while True:
-        loopEnd = False
         res = requests.get(trackListUrl%(albumId, pageNum), headers=headers)
 
         if res.status_code == 200 and res.headers['content-type'] == 'application/json':
             resData = res.json()
             if pageNum == 1:
                 trackTotalCount = resData['data']['trackTotalCount']
+                print('trackTotalCount:', trackTotalCount)
             
             trackList = resData['data']['tracks']
             if isinstance(trackList, list) and len(trackList) > 0:
                 for track in trackList:
-                    index = track['index']
-
-                    if index <= lastTrackIdx:
-                        loopEnd = True
-                        break
-
-                    item = {
-                        'albumId': albumId,
-                        'index': index, 
-                        'trackId': track['trackId'], 
-                        'title': track['title']
-                    }
-                    # print(item)
-                    allTrackList.append(item)
+                    trackId = track['trackId']
+                    trackTotalCount = trackTotalCount + 1
+                    if not isTrackExist(albumId, trackId):
+                        item = {
+                            'albumId': albumId,
+                            'trackId': trackId, 
+                            'title': track['title']
+                        }
+                        # print(item)
+                        allTrackList.insert(0, item)
             else:
                 break
         else:
             break
 
-        if loopEnd:
+        if trackTotalCount >= trackTotalCount:
             break
-
+        
         pageNum = pageNum + 1
         sleep(1)
     
-    print(trackTotalCount, len(allTrackList))
+    for item in allTrackList:
+        index = index + 1
+        item['index'] = index
+
     return allTrackList
 
 
