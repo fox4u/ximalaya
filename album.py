@@ -1,10 +1,11 @@
 import requests, wget, os
 from time import sleep
 from db import getLastTrackIdx, updateTrackInfoList, getDownloadList, setDownloadDone, isTrackExist
+from sign import getSign
 
 trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d'
 trackAudioUrl = 'https://www.ximalaya.com/revision/play/v1/audio?id=%s&ptype=1'
-headers = {'user-agent': 'ximalaya/0.0.1'}
+headers = {'user-agent': 'ximalaya/0.0.1', 'xm-sign': getSign()}
 
 DOWNLOADDIR = 'download/'
 
@@ -51,7 +52,7 @@ def getAlbumTrackList(albumId: str):
             if isinstance(trackList, list) and len(trackList) > 0:
                 for track in trackList:
                     trackId = track['trackId']
-                    trackTotalCount = trackTotalCount + 1
+                    trackHandleCount = trackHandleCount + 1
                     if not isTrackExist(albumId, trackId):
                         item = {
                             'albumId': albumId,
@@ -65,7 +66,7 @@ def getAlbumTrackList(albumId: str):
         else:
             break
 
-        if trackTotalCount >= trackTotalCount:
+        if trackHandleCount >= trackTotalCount:
             break
         
         pageNum = pageNum + 1
