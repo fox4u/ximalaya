@@ -47,6 +47,8 @@ def getAlbumTrackList(albumId: str):
             if pageNum == 1:
                 trackTotalCount = resData['data']['trackTotalCount']
                 print('trackTotalCount:', trackTotalCount)
+
+            print('fetching page', pageNum)
             
             trackList = resData['data']['tracks']
             if isinstance(trackList, list) and len(trackList) > 0:
@@ -85,7 +87,8 @@ def handleDownload(albumId: str):
         folder = DOWNLOADDIR + albumId
         createDirIfNotExist(folder)
         for item in downloadList:
-            filename = folder + '/' + str(item[0]) + '-' + item[1] + '.m4a'
+            titleValid = item[1].translate(str.maketrans({'|': '-', ':': '-'}))
+            filename = folder + '/' + str(item[0]) + '-' + titleValid + '.m4a'
             try:
                 print('\ndownloading...' + item[1])
                 wget.download(item[2], out=filename)
