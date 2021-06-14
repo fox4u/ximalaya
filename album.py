@@ -5,9 +5,14 @@ from sign import getSign
 
 trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d'
 trackAudioUrl = 'https://www.ximalaya.com/revision/play/v1/audio?id=%s&ptype=1'
-headers = {'user-agent': 'ximalaya/0.0.1', 'xm-sign': getSign()}
+headersTemplate = {'user-agent': 'ximalaya/0.0.1'}
 
 DOWNLOADDIR = 'download/'
+
+def getReqHeaders():
+    headers = headersTemplate
+    headers['xm-sign'] = getSign()
+    return headers
 
 def handleAlbum(albumId: str):
     allTrackList = getAlbumTrackList(albumId)
@@ -20,11 +25,13 @@ def getTrackInfoTupleWithUrl(trackInfo: dict):
     trackId = trackInfo['trackId']
 
     if trackId != None:
-        res = requests.get(trackAudioUrl%(trackId), headers=headers)
+        res = requests.get(trackAudioUrl%(trackId), headers=getReqHeaders())
 
         if res.status_code == 200 and res.headers['content-type'] == 'application/json':
             resData = res.json()
             trackInfo['url'] = resData['data']['src'] if resData['data'] and resData['data']['src'] else ''
+        else:
+            print(res.text)
 
     print(trackInfo)    
     sleep(2)
@@ -40,7 +47,7 @@ def getAlbumTrackList(albumId: str):
     trackHandleCount = 0
     allTrackList = []
     while True:
-        res = requests.get(trackListUrl%(albumId, pageNum), headers=headers)
+        res = requests.get(trackListUrl%(albumId, pageNum), headers=getReqHeaders())
 
         if res.status_code == 200 and res.headers['content-type'] == 'application/json':
             resData = res.json()
