@@ -3,7 +3,7 @@ from time import sleep
 from db import getLastTrackIdx, updateTrackInfoList, getDownloadList, setDownloadDone, isTrackExist
 from sign import getSign
 
-trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d'
+trackListUrl = 'https://www.ximalaya.com/revision/album/v1/getTracksList?albumId=%s&pageNum=%d&sort=1'
 trackAudioUrl = 'https://www.ximalaya.com/revision/play/v1/audio?id=%s&ptype=1'
 headersTemplate = {'user-agent': 'ximalaya/0.0.1'}
 
